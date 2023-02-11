@@ -40,18 +40,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomePage(){
-
-    val sheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
-        skipHalfExpanded = true
-    )
+fun HomePage(sheetState: ModalBottomSheetState){
 
    BookList(title = "Top rated", sheetState = sheetState)
 
-    FiltersBottomSheet(
-        sheetState
-    )
 }
 
 @Composable
@@ -265,7 +257,7 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
         sheetBackgroundColor = Color.White,
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         sheetContentColor = Color.White,
-        modifier = Modifier.padding(top = 10.dp)
+        modifier = Modifier.padding(top = 66.dp)
     ){
 
     }
@@ -511,8 +503,9 @@ fun BookCardPreview(){
         BookCard()
     }
 }
+@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun HomePagePreview(){
-    HomePage()
+    HomePage(rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden))
 }

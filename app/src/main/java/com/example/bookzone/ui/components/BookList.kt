@@ -27,9 +27,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BookList(title : String,sheetState: ModalBottomSheetState){
     Column(modifier = Modifier
-        .padding(bottom = 90.dp)
-        .fillMaxHeight()
-        .width(480.dp)
+        .fillMaxWidth()
     ) {
 
         Box(modifier = Modifier
@@ -41,7 +39,7 @@ fun BookList(title : String,sheetState: ModalBottomSheetState){
             val scope = rememberCoroutineScope()
 
             Text(
-                text = title,
+                text = "$title books",
                 modifier = Modifier
                     .padding(start = 10.dp)
                     .align(alignment = Alignment.CenterStart),

@@ -2,6 +2,7 @@ package com.example.bookzone.ui.categories
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,25 +20,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.bookzone.R
 import com.example.bookzone.utlis.data.categories
 
 @Composable
-fun CategoryPage(){
+fun CategoryPage(navController: NavHostController) {
 
     LazyColumn(modifier = Modifier
         .fillMaxSize()
         .background(color = Color.White)) {
 
         items(categories){category ->
-            CategoryCard(name = category.name, image = category.thumbnail)
+            CategoryCard(name = category.name, image = category.thumbnail){
+                navController.navigate("booksOfCategory/${category.name}")
+            }
         }
     }
 }
 
 @Composable
-fun CategoryCard(name : String,image : Int){
-    Box(modifier = Modifier.padding(15.dp)) {
+fun CategoryCard(name : String,image : Int,onClick : ()->Unit){
+    Box(modifier = Modifier
+        .padding(15.dp)
+        .clickable {
+            onClick()
+        }) {
         Image(
             painter = painterResource(id = image),
             modifier = Modifier
@@ -74,10 +83,12 @@ fun CategoryCard(name : String,image : Int){
 @Preview
 @Composable
 fun CardPreview(){
-    CategoryCard(name = "Medical", image = R.drawable.medical)
+    CategoryCard(name = "Medical", image = R.drawable.medical){
+
+    }
 }
 @Preview
 @Composable
 fun CategoryPagePreview(){
-    CategoryPage()
+    CategoryPage(rememberNavController())
 }
