@@ -32,3 +32,23 @@ val Typography = Typography(
     )
     */
 )
+
+val LargeText = TextStyle(
+    fontSize = 24.sp,
+    fontWeight = FontWeight.SemiBold
+)
+
+val ExtraLargeText = TextStyle(
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 27.sp
+)
+
+val MediumText = TextStyle(
+    fontWeight = FontWeight.Medium,
+    fontSize = 17.sp
+)
+
+val smallText = TextStyle(
+    fontWeight = FontWeight.Medium,
+    fontSize = 14.sp,
+)
