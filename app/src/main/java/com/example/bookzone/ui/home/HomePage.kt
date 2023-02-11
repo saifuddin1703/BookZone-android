@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bookzone.R
 import com.example.bookzone.model.Book
+import com.example.bookzone.ui.components.BookList
 import com.example.bookzone.ui.components.StarBar
 import com.example.bookzone.ui.theme.*
 import kotlinx.coroutines.launch
@@ -39,78 +40,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomePage(){
+fun HomePage(sheetState: ModalBottomSheetState){
 
-    val sheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
-        skipHalfExpanded = true
-    )
+   BookList(title = "Top rated", sheetState = sheetState)
 
-    Column(modifier = Modifier
-        .padding(bottom = 90.dp)
-        .fillMaxHeight()
-        .width(480.dp)
-    ) {
-
-        Box(modifier = Modifier
-            .height(48.dp)
-            .fillMaxWidth()
-            .background(color = Color.White)
-        ){
-
-            val scope = rememberCoroutineScope()
-
-            Text(
-                text = "Top rated",
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .align(alignment = CenterStart),
-                fontWeight = MediumText.fontWeight,
-                fontSize = MediumText.fontSize,
-                color = Color.Black
-            )
-
-            Row(
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .align(alignment = CenterEnd)
-                    .background(color = filterColor, shape = RoundedCornerShape(7.dp))
-                    .clickable {
-                        scope.launch {
-                            sheetState.show()
-                        }
-                    }
-            ) {
-                Icon(painter = painterResource(id = R.drawable.filter),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .size(15.dp)
-                        .align(alignment = CenterVertically)
-                )
-
-                Text(
-                    text = "Filters",
-                    fontSize = smallText.fontSize,
-                    fontWeight = smallText.fontWeight,
-                    modifier = Modifier
-                        .padding(start = 5.dp, end = 5.dp)
-                        .align(alignment = CenterVertically)
-                )
-            }
-        }
-
-        LazyColumn(modifier = Modifier.background(color = Color.White)){
-            items(3)
-            {
-                BookCard()
-            }
-        }
-    }
-
-    FiltersBottomSheet(
-        sheetState
-    )
 }
 
 @Composable
@@ -324,7 +257,7 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
         sheetBackgroundColor = Color.White,
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         sheetContentColor = Color.White,
-        modifier = Modifier.padding(top = 10.dp)
+        modifier = Modifier.padding(top = 66.dp)
     ){
 
     }
@@ -570,8 +503,9 @@ fun BookCardPreview(){
         BookCard()
     }
 }
+@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun HomePagePreview(){
-    HomePage()
+    HomePage(rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden))
 }
