@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingPage(){
+
     Scaffold(modifier = Modifier
         .background(color = Color.White)
         .fillMaxSize()
@@ -77,7 +78,7 @@ fun LandingPage(){
                         },
                         icon = {
                             Image(painter = painterResource(id = item.iconId),
-                                modifier = Modifier.size(33.dp),
+                                modifier = Modifier.size(30.dp),
                                 contentDescription = "icon")
                         }
                     )
