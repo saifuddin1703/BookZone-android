@@ -398,7 +398,8 @@ fun BookCard(){
 
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(color = Color.White)) {
+        .background(color = Color.White))
+    {
 
         Image(
             painter = painterResource(id = R.drawable.book2),
@@ -447,55 +448,62 @@ fun BookCard(){
             )
 
             Row {
-                Row(
-                    modifier = Modifier
-                        .padding(end = 10.dp)
-                        .background(color = primaryButtonColor, shape = RoundedCornerShape(7.dp))
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.buy_icon),
-                        contentDescription = "buy icon",
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .width(30.dp)
-                            .height(35.dp)
-                            .align(alignment = CenterVertically),
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(15.dp))
-                    Text(
-                        text = "Buy",
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .align(alignment = CenterVertically),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 24.sp,
-                        color = Color.White
-                    )
-                    
-                    Spacer(modifier = Modifier.width(30.dp))
-                }
+                BuyButton()
 
-                Box(
-                    modifier = Modifier
-                        .background(color = secondaryButtonColor, shape = RoundedCornerShape(7.dp))
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cart_icon),
-                        contentDescription = "buy icon",
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .size(25.dp)
-                            .align(alignment = Center),
-                        tint = Color.White
-                    )
-                }
+                AddToCartButton()
             }
         }
     }
-
 }
 
+@Composable
+fun AddToCartButton(){
+    Box(
+        modifier = Modifier
+            .background(color = secondaryButtonColor, shape = RoundedCornerShape(7.dp))
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.cart_icon),
+            contentDescription = "buy icon",
+            modifier = Modifier
+                .padding(10.dp)
+                .size(25.dp)
+                .align(alignment = Center),
+            tint = Color.White
+        )
+    }
+}
+@Composable
+fun BuyButton(){
+    Row(
+        modifier = Modifier
+            .padding(end = 10.dp)
+            .background(color = primaryButtonColor, shape = RoundedCornerShape(7.dp))
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.buy_icon),
+            contentDescription = "buy icon",
+            modifier = Modifier
+                .padding(5.dp)
+                .width(30.dp)
+                .height(35.dp)
+                .align(alignment = CenterVertically),
+            tint = Color.White
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Text(
+            text = "Buy",
+            modifier = Modifier
+                .padding(5.dp)
+                .align(alignment = CenterVertically),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 24.sp,
+            color = Color.White
+        )
+
+        Spacer(modifier = Modifier.width(30.dp))
+    }
+}
 @Preview
 @Composable
 fun BookCardPreview(){
