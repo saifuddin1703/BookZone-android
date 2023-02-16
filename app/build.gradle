@@ -1,6 +1,10 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+//    id("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -48,6 +52,18 @@ android {
 
 dependencies {
 
+    //hilt dependencies
+    implementation("com.google.dagger:hilt-android:2.44")
+    implementation 'androidx.core:core-ktx:+'
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+
+
+    // retrofit dependencies
+    def retrofit_version = "2.9.0"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+
     def nav_version = "2.5.3"
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
@@ -64,4 +80,8 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+}
+
+kapt {
+    correctErrorTypes = true
 }

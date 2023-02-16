@@ -35,7 +35,10 @@ import com.example.bookzone.ui.home.HomePage
 import com.example.bookzone.ui.theme.BookZoneTheme
 import com.example.bookzone.ui.wishlist.WishlistPage
 import com.example.bookzone.utlis.models.NavItem
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
