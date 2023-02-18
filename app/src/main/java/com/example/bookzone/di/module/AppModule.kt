@@ -2,19 +2,23 @@ package com.example.bookzone.di.module
 
 import com.example.bookzone.retrofit.Retrofit
 import com.example.bookzone.retrofit.services.*
+import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 
-@InstallIn(ActivityComponent::class)
+@Module
+@InstallIn(SingletonComponent::class)
 object AppModule {
 
     private val retrofit = Retrofit.getInstance()
 
     @Provides
     fun provideBookService(): BookService {
-        return retrofit.create(BookService::class.java)
+        return Retrofit.getInstance().create(BookService::class.java)
     }
 
     @Provides

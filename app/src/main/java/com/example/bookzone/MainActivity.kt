@@ -2,6 +2,7 @@ package com.example.bookzone
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -13,6 +14,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -20,12 +22,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.bookzone.ui.book.repository.BookRepository
+import com.example.bookzone.ui.book.viewmodel.BookViewModel
 import com.example.bookzone.ui.cart.CartPage
 import com.example.bookzone.ui.categories.BooksOfCategory
 import com.example.bookzone.ui.categories.CategoryPage
@@ -36,12 +42,21 @@ import com.example.bookzone.ui.theme.BookZoneTheme
 import com.example.bookzone.ui.wishlist.WishlistPage
 import com.example.bookzone.utlis.models.NavItem
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var bookRepository: BookRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        try {
+            Log.d("TAG",bookRepository.toString())
+        }catch (e : Exception){
+            Log.d("TAG",e.message.toString())
+        }
         setContent {
             BookZoneTheme {
                 // A surface container using the 'background' color from the theme
@@ -50,6 +65,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
+                    Log.d("TAg","start")
                     LandingPage(navController)
                 }
             }
@@ -67,6 +83,16 @@ fun LandingPage(navController: NavHostController) {
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
+
+    var filterOptions = remember {
+        mutableStateMapOf<String,String>()
+    }
+
+    filterOptions["price[gte]"] = "0"
+    filterOptions["price[lte]"] = "50000"
+    filterOptions["book_depository_stars[gte]"] = "4"
+
+//    filterOptions["sort"] = "-price,-book_depository_stars"
 
     Scaffold(modifier = Modifier
         .background(color = Color.White)
@@ -133,7 +159,10 @@ fun LandingPage(navController: NavHostController) {
 
         NavHost(navController = navController, startDestination = "home",modifier = Modifier.padding(top = 56.dp, bottom = 90.dp)){
             composable("home"){
-                HomePage(sheetState)
+                val viewmodel : BookViewModel = hiltViewModel()
+                Log.d("TAG", viewmodel.toString())
+                Log.d("TAG", hiltViewModel<BookViewModel>().toString())
+                HomePage(sheetState,filterOptions = filterOptions.toMap())
             }
             composable("categories"){
                 CategoryPage(navController)
@@ -155,11 +184,26 @@ fun LandingPage(navController: NavHostController) {
             }
         }
     }
+
+    val scope = rememberCoroutineScope()
     FiltersBottomSheet(
         sheetState
-    )
+    ){
+        try {
+            scope.launch {
+                sheetState.hide()
+            }
+            it.forEach { action->
+                filterOptions[action.key] = action.value
+            }
+            Log.d("TAG",filterOptions.toMap().toString())
+        }catch (e : java.lang.Exception){
+            Log.d("ERROR",e.message.toString())
+        }
+    }
 
 }
+
 @Composable
 fun Greeting(name: String) {
     Text(text = "Hello $name!")

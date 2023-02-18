@@ -27,12 +27,10 @@ object Retrofit {
             .setLenient()
             .create()
 
-        val retrofit =  Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
-
-        return retrofit
     }
 }
