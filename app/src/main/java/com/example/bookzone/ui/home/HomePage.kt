@@ -1,10 +1,10 @@
 package com.example.bookzone.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -14,6 +14,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
@@ -30,20 +32,63 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.util.rangeTo
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.example.bookzone.R
 import com.example.bookzone.model.Book
-import com.example.bookzone.ui.components.BookList
+import com.example.bookzone.ui.book.viewmodel.BookViewModel
+import com.example.bookzone.ui.book.BookList
+import com.example.bookzone.ui.book.UIState
 import com.example.bookzone.ui.components.StarBar
 import com.example.bookzone.ui.theme.*
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomePage(sheetState: ModalBottomSheetState){
+fun HomePage(
+    sheetState: ModalBottomSheetState,
+//    bookViewModel: BookViewModel,
+    filterOptions : Map<String,String>
+){
+    val bookViewModel = hiltViewModel<BookViewModel>()
 
-   BookList(title = "Top rated", sheetState = sheetState)
+    LaunchedEffect(key1 = filterOptions){
+        Log.d("TAG","launced effect")
+        bookViewModel.getBooks(filterOptions)
+    }
+    Log.d("TAG","home page")
 
+
+    val uiState = bookViewModel.state.observeAsState()
+
+//    when (uiState.value){
+//        UIState.LOADING->{}
+//        UIState.SUCCESS ->{}
+//    }
+
+
+    if (uiState.value?.isLoading == true){
+        // loading page
+        Box(modifier = Modifier.fillMaxSize()){
+            CircularProgressIndicator(modifier = Modifier.align(alignment = Center))
+        }
+    }else{
+        uiState.value?.message?.let {
+            // error page
+            Box(modifier = Modifier.fillMaxSize()){
+                Text(text = "error loading books",modifier = Modifier.align(alignment = Center))
+            }
+        }
+
+        uiState.value?.data?.let {
+            BookList(title = "Top rated", sheetState = sheetState, books = it)
+        }
+    }
+
+    
 }
 
 @Composable
@@ -78,7 +123,25 @@ fun FormatCard(name : String){
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
+fun FiltersBottomSheet(
+    sheetState: ModalBottomSheetState,
+    onApply : (SnapshotStateMap<String, String>)->Unit
+) {
+
+    val filterOptions = remember {
+        mutableStateMapOf<String,String>()
+    }
+
+    filterOptions["price[gte]"] = "0"
+    filterOptions["price[lte]"] = "50000"
+    filterOptions["book_depository_stars[gte]"] = "4"
+
+    val defaultFilters = mutableMapOf<String,String>()
+    defaultFilters["price[gte]"] = "0"
+    defaultFilters["price[lte]"] = "50000"
+    defaultFilters["book_depository_stars[gte]"] = "4"
+//    defaultFilters["sort"] = "-price,-book_depository_stars"
+
     ModalBottomSheetLayout (
         sheetState = sheetState,
         sheetContent =
@@ -108,7 +171,14 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
                         text = "Reset",
                         fontSize = MediumText.fontSize,
                         fontWeight = MediumText.fontWeight,
-                        modifier = Modifier.align(alignment = CenterEnd),
+                        modifier = Modifier
+                            .clickable {
+                                defaultFilters.forEach {
+                                    filterOptions[it.key] = it.value
+                                }
+//                                Log.d
+                            }
+                            .align(alignment = CenterEnd),
                         textDecoration = TextDecoration.Underline
                     )
                 }
@@ -151,13 +221,14 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
                 )
 
                 Box(modifier = Modifier.padding(start = 20.dp, end = 20.dp)) {
-                    var priceRange by remember {
-                        mutableStateOf(0f..50000f) // pass the initial values
-                    }
+                    var priceRange  = (filterOptions["price[gte]"]?.toFloat() ?: 0f)..(filterOptions["price[lte]"]?.toFloat()
+                        ?: 50000f)
                     androidx.compose.material3.RangeSlider(
                         values = priceRange,
                         onValueChange = { sliderValues_ ->
                             priceRange = sliderValues_
+                            filterOptions["price[gte]"] = "${priceRange.start}"
+                            filterOptions["price[lte]"] = "${priceRange.endInclusive}"
                         },
                         valueRange = 0f..50000f,
                         onValueChangeFinished = {
@@ -198,8 +269,10 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
                     ){
 
                         var selectedRating by remember {
-                            mutableStateOf(4)
+                            mutableStateOf(filterOptions["book_depository_stars[gte]"]?.toInt())
                         }
+
+                        filterOptions["book_depository_stars[gte]"] = "$selectedRating"
 
                         for (stars in 4 downTo 1)
                             CustomerRatingFilter(
@@ -218,12 +291,12 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
                     Column {
                         SortByFilter(title = "Price")
                         {
-
+//                            filterOptions["sort"]?.set(0, if (it == -1) "-price" else "price")
                         }
 
                         SortByFilter(title = "Ratings")
                         {
-
+//                            filterOptions["sort"]?.set(0, if (it == -1) "-book_depository_stars" else "book_depository_stars")
                         }
                     }
                 }
@@ -231,7 +304,7 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Button(
                         onClick = {
-
+                                  onApply(filterOptions)
                         },
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = primaryButtonColor,
@@ -263,6 +336,15 @@ fun FiltersBottomSheet(sheetState: ModalBottomSheetState) {
     }
 }
 
+
+@OptIn(ExperimentalMaterialApi::class)
+@Preview
+@Composable
+fun BottomSheetPreview(){
+    FiltersBottomSheet(sheetState = ModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)){
+
+    }
+}
 
 @Composable
 fun CustomerRatingFilter(
@@ -382,130 +464,10 @@ fun FilterBox(title : String,content : @Composable () -> Unit){
 fun FormatPreview(){
     FormatCard(name = "Paperback")
 }
-@Composable
-fun BookCard(){
 
-    val book = Book(
-        _id = "id",
-        image= "",
-        name = "This is Going to Hurt",
-        author = "Adam kay",
-        format = "Paperback",
-        book_depository_stars = 5,
-        price = 649,
-        category = "medical"
-    )
-
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .background(color = Color.White)) {
-
-        Image(
-            painter = painterResource(id = R.drawable.book2),
-            contentDescription = "Book image",
-            modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp)
-                .width(161.dp)
-                .height(244.dp)
-        )
-
-        Column(
-            modifier = Modifier.padding(top = 10.dp,bottom = 10.dp, end = 10.dp)
-        ){
-
-            Text(
-                text = book.name,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp
-            )
-
-            Text(
-                text = "by ${book.author}",
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                color = secondaryTextColor,
-                modifier = Modifier.padding(bottom = 5.dp)
-            )
-
-            StarBar(
-                rating = book.book_depository_stars.toFloat(),
-                ratingCount = 189,
-                starSize = 17.dp
-            )
-
-            Text(
-                text = book.format,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-            )
-
-            Text(
-                text = "₹ ${book.price}",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 27.sp,
-                modifier = Modifier.padding(top = 30.dp, bottom = 10.dp)
-            )
-
-            Row {
-                Row(
-                    modifier = Modifier
-                        .padding(end = 10.dp)
-                        .background(color = primaryButtonColor, shape = RoundedCornerShape(7.dp))
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.buy_icon),
-                        contentDescription = "buy icon",
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .width(30.dp)
-                            .height(35.dp)
-                            .align(alignment = CenterVertically),
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(15.dp))
-                    Text(
-                        text = "Buy",
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .align(alignment = CenterVertically),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 24.sp,
-                        color = Color.White
-                    )
-                    
-                    Spacer(modifier = Modifier.width(30.dp))
-                }
-
-                Box(
-                    modifier = Modifier
-                        .background(color = secondaryButtonColor, shape = RoundedCornerShape(7.dp))
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cart_icon),
-                        contentDescription = "buy icon",
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .size(25.dp)
-                            .align(alignment = Center),
-                        tint = Color.White
-                    )
-                }
-            }
-        }
-    }
-
-}
-
-@Preview
-@Composable
-fun BookCardPreview(){
-    BookZoneTheme {
-        BookCard()
-    }
-}
 @OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun HomePagePreview(){
-    HomePage(rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden))
+    HomePage(rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden), filterOptions = mapOf())
 }

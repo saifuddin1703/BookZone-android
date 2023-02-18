@@ -1,9 +1,10 @@
-package com.example.bookzone.ui.components
+package com.example.bookzone.ui.book
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -17,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.bookzone.R
-import com.example.bookzone.ui.home.BookCard
+import com.example.bookzone.model.Book
 import com.example.bookzone.ui.theme.MediumText
 import com.example.bookzone.ui.theme.filterColor
 import com.example.bookzone.ui.theme.smallText
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BookList(title : String,sheetState: ModalBottomSheetState){
+fun BookList(title : String,sheetState: ModalBottomSheetState,books:List<Book>){
     Column(modifier = Modifier
         .fillMaxWidth()
     ) {
@@ -79,9 +80,9 @@ fun BookList(title : String,sheetState: ModalBottomSheetState){
         }
 
         LazyColumn(modifier = Modifier.background(color = Color.White)){
-            items(3)
-            {
-                BookCard()
+            items(books)
+            {book ->
+                BookCard(book = book)
             }
         }
     }
